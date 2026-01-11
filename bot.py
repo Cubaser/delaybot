@@ -28,10 +28,10 @@ async def start(message: types.Message):
         return
     await message.answer(
         '🤖 Бот отложенных сообщений\n\n'
-        '/add YYYY-MM-DD HH:MM - добавить отложенное сообщение\n'
+        '/add DD-MM-YYYY HH:MM - добавить отложенное сообщение\n'
         '/chatid - узнать chat_id\n'
-        '/list - список заплонированных сообщений\n'
-        '/cancel_<ID> - отменить заплонированное сообщение\n'
+        '/list - список запланированных сообщений\n'
+        '/cancel_<ID> - отменить запланированное сообщение\n'
     )
 
 
@@ -90,14 +90,17 @@ async def add(message: types.Message):
         return
     try:
         _, date, time = message.text.split()
-        send_at = datetime.fromisoformat(f'{date} {time}')
+        send_at = datetime.strptime(
+            f'{date} {time}',
+            '%d-%m-%Y %H:%M'
+        )
 
         user_waiting[message.from_user.id] = {'send_at': send_at}
         await message.answer(
             '✅ Отлично! Отправь сообщение, которое нужно отправить в группу'
         )
     except Exception:
-        await message.answer('❌ Формат команды: /add 2026-01-15 18:30')
+        await message.answer('❌ Формат команды: /add 15-01-2026 18:30')
 
 
 @dp.message()
