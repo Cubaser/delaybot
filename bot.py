@@ -54,10 +54,12 @@ async def list_cmd(message: types.Message):
         return
 
     text = '📋 Запланированные сообщения:\n\n'
-    for task_id, message_id, send_at in rows:
+    for task_id, _, message_id, send_at in rows:
+        send_at_format = datetime.fromisoformat(send_at)
+        formatted = send_at_format.strftime('%d-%m-%Y %H:%M')
         text += (
             f'🆔: {task_id}\n'
-            f'🕒 {send_at}\n'
+            f'🕒 {formatted}\n'
             f'📝 message_id: {message_id}\n'
             f'❌ Отменить: /cancel_{task_id}\n'
         )
@@ -94,6 +96,12 @@ async def add(message: types.Message):
             f'{date} {time}',
             '%d-%m-%Y %H:%M'
         )
+        if datetime.now() >= send_at:
+            await message.answer(
+                f'❌ Нельзя запланировать сообщение в прошлом\n'
+                f'Текущее время: {datetime.now().strftime("%d-%m-%Y %H:%M")}'
+            )
+            return
 
         user_waiting[message.from_user.id] = {'send_at': send_at}
         await message.answer(
